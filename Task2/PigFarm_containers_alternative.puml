@@ -1,0 +1,81 @@
+
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+    title Контейнерная диаграмма PigFarm
+
+    Person(livestockSpecialist, "Зоотехник", "Следит за запасами еды и прогнозирует расход")
+    Person(livestockBreeder, "Животновод", "осществляет кормление и поение животных")
+    Person(Veterinar, "Ветеринар", "Следит за состоянием животных")
+    Person(TechnicalSpecialist, "Техник", "Технический специалист, обслуживающий оборудование")
+    Person(Manager, "Руководитель", "Руководитель, анали")
+    Person(TechnicalSpecialist, "Техник", "Технический специалист, обслуживающий оборудование")
+    Person(Stockman, "Кладовщик", "Сотрудник склада, осуществляющий отгрузку")
+
+    System_Boundary(local_agent, "Локальный агент") {
+        Container(mobile_app, "Мобильное приложение", "React Native", "Личный кабинет ветеринара, оповещения об инцидентах")
+        Container(web_app, "Личный кабинет", "Angular", "Личный кабинет сотрудника")
+        Container(api, "API Gateway", "Spring Boot", "Обработка запросов")
+        Container(auth, "Auth Service", "Java", "Аутентификация")
+        Container(FoodStock, "Планирование рациона", "Java", "Контроль запасов и прогнозирование расхода кормов")
+        Container(scheduler, "Управление кормушками", "Java", "Управление кормушками и поилками")
+        Container(WaterMonitor, "Анализатор фильтрации воды", "Java", "Анализатор фильтрации воды")
+        Container(AiAgents, "ИИ агенты", "ML", "ИИ агенты для мониторинга инцидентов и состояния животных")
+        Container(AnimalMonitoringService, "Сервис мониторинга животных", "Java", "Принимает события мониторинга с ИИ агентов и предоставляет данные пользователю")
+        Container(VideoDrivers, "Видеодрайверы", "C++", "Драйверы для камер видеонаблюдения")
+        Container(WaterSensorDriver, "Драйвер дачика чистоты воды", "C++", "Драйверы для датчика чистоты воды")
+        Container(OrderService, "Сервис заказов", "Java", "Сервис размещения заказов")
+        Container(ReplicationService, "Сервис репликации", "Java", "Сервис репликации данных")
+        Container(db, "Локальная база данных", "PostgreSQL", "Хранение данных")
+    }
+
+    System_Boundary(central_office_system, "Центральный офис") {
+        Container(central_web_app, "React Native", "Личный кабинет руководства компании")
+        Container(stock_web_app, "React Native", "Личный кабинет работников склада и сотрудников, делающих заказы")
+        Container(central_api, "API Gateway", "Spring Boot", "Обработка запросов")
+        Container(central_auth, "Auth Service", "Java", "Аутентификация")
+        Container(analiticService, "Сервис аналитики", "Отчеты мониторинга скота для руководства")
+        Container(stockService, "Управление складом", "Сервис приема и управления состояния заказов")
+        Container(EnterpriseServiceBus, "Корпоративная сервисная шина", "Kafka", "Корпоративная сервисная шина")
+        Container(central_db, "Центральная база данных", "PostgreSQL", "Хранение данных")
+    }
+
+    Rel(Veterinar, mobile_app, "Использует приложение")
+    Rel(Veterinar, web_app, "Входит в ЛК")
+    Rel(livestockSpecialist, web_app, "Входит в ЛК")
+    Rel(livestockBreeder, web_app, "Входит в ЛК")
+    Rel(TechnicalSpecialist, web_app, "Входит в ЛК")
+    Rel(web_app, api, "API запросы")
+    Rel(mobile_app, api, "API запросы")
+    Rel(api, auth, "Проверка доступа")
+    Rel(api, scheduler, "Запрос плана кормления и поения животных")
+    Rel(api, FoodStock, "Ввод данных о поставках и запасах еды")
+    Rel(FoodStock, scheduler, "Планирование расхода еды")
+    Rel(api, WaterMonitor, "Получение данных о фильтрации воды")
+    Rel(WaterSensorDriver, WaterMonitor, "Оцифрованный поток данных с датчиков состояния воды")
+    Rel(api, AiAgents, "Запрос данных мониторинга животных")
+    Rel(api, OrderService, "Запрос событий мониторинга")
+    Rel(api, AnimalMonitoringService, "События мониторинга")
+    Rel(AiAgents, AnimalMonitoringService, "События мониторинга")
+    Rel(VideoDrivers, AiAgents, "Оцифрованные поток данных с камер")
+    Rel(auth, db, "Чтение/запись данных")
+    Rel(scheduler, db, "Чтение/запись данных")
+    Rel(FoodStock, db, "Чтение/запись данных")
+    Rel(OrderService, db, "Чтение/запись данных")
+    Rel(auth, db, "Чтение/запись данных")
+    Rel(ReplicationService, db, "Чтение данных")
+    Rel(ReplicationService, EnterpriseServiceBus, "Отправка заказов и данных для аналитики в центральную систему")
+    Rel(EnterpriseServiceBus, OrderService, "Изменения статуса заказов")
+
+    Rel(central_web_app, central_api, "API запросы")
+    Rel(central_api, central_auth, "Авторизация пользователей")
+    Rel(central_api, analiticService, "Создание отчетов о состоянии скота")
+    Rel(EnterpriseServiceBus, analiticService, "Поток данных мониторинга с каждой фермы")
+    Rel(analiticService, central_db, "Чтение/запись данных")
+    Rel(stock_web_app, central_api, "API запросы")
+    Rel(central_api, stockService, "Управление заказами")
+    Rel(stockService, central_db, "Чтение/запись данных")
+    Rel(TechnicalSpecialist, stock_web_app, "Управление заказами")
+    Rel(Stockman, stock_web_app, "Управление заказами")
+    Rel(Manager, central_web_app, "Просмотр статистики")
+
+@enduml

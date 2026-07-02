@@ -1,0 +1,106 @@
+
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+    title Диаграмма классов PigFarm
+
+    Component(auth, "Auth Service", "Java", "Аутентификация") {
+        Class User {
+          -String name
+          -String email
+          -String role
+        }
+
+        Class UserService {
+          +void register(String name, String password, String email, String role)
+          +String login(String name, String password)
+        }
+    }
+
+    Component(scheduler, "Управление кормушками", "Java", "Управление кормушками и поилками") {
+        Class FeedingThrouth {
+          -String model
+          -String volume
+        }
+
+        Class DrinkingBowl {
+          -String model
+          -String volume
+          -String inventNumber
+        }
+
+        Class FeedSchedulerService {
+          +List<FeedingThrouth> scheduleDayFeeding()
+          +List<DrinkingBowl> scheduleDayDrinking()
+        }
+    }
+
+    Component(FoodStock, "Планирование рациона", "Java", "Контроль запасов и прогнозирование расхода кормов") {
+        Class FoodStockService {
+          +void saveDayFeed(int quantity)
+          +void saveFeedingThrouth(FeedingThrouth feedingThrouth)
+        }
+    }
+
+    Component(AnimalMonitoringService, "Сервис мониторинга животных", "Java", "Принимает события мониторинга с ИИ агентов и предоставляет данные пользователю") {
+        Enum AnimalMonitoringEventType {
+          INCIDENT,
+          LIVESTOCK_COUNT,
+          DESEASE,
+          DEATH
+        }
+
+        Class AnimalMonitoringEvent {
+          -AnimalMonitorinType monitoringType
+          -String cellNumber
+          -int liveStock
+        }
+
+        Class AnimalMonitoringService {
+          +void saveMonitoringEvent
+          +List<AnimalMonitoringEvent> getEvents(LocalDateTime strtTime, LocalDateTime endTime)
+        }
+    }
+
+    Component(OrderService, "Сервис заказов", "Java", "Сервис размещения заказов") {
+        Class OrderItem {
+          -String goodName
+          -String quantity
+          -BigDecimal price
+        }
+
+        Enum OrderState {
+          CREATED,
+          IN_SERVICE,
+          DELIVERING
+        }
+
+        Class Order {
+          -String orderNumber
+          -GUID creatorId
+          -List<orderItem> items
+        }
+
+        Class OrderService {
+          +String createOrder(List<OrderItem> items, GUID creatorId)
+          List<OrderItem> getOrders(GUID creatorId)
+        }
+    }
+
+    Component(WaterMonitor, "Анализатор фильтрации воды", "Java", "Анализатор фильтрации воды") {
+        Class WaterQuality {
+          +BigDecimal ironQty
+          +BigDecimal manganeseQty
+          +BigDecimal nitrateQty
+          +BigDecimal ph
+          +BigDecimal hardness
+          +BigDecimal bacteriaQty
+          +BigDecimal turbidity
+        }
+
+        Class WaterQualityService {
+          void setWaterQuality(WaterQuality quality)
+          List<WaterQuality> getWaterQuality(LocalDateTime startTime, LocalDateTime endTime)
+        }
+    }
+
+@enduml
