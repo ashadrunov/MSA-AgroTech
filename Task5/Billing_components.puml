@@ -1,0 +1,21 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+    title Схема биллинга PigFarm
+    Person(Tenant, "Арендатор", "Арендатор платформы")
+    Component(tenant_web, "Интерфейс управления тенантами", "Управление тенантами через web портал")
+    Component(TenantGateway, "Tenant Gateway", "Единая точка входа для арендаторов")
+    Component(TenantAuthService, "Tenant Auth Service", "Сервис регистрации аккаунтов и авторизации арендаторов")
+    Component(TenantBillingService, "Сервис биллинга", "Управление процессом оплаты")
+    Component_Ext(BillingGateway, "Платежный шлюз", "Внешний биллинговый сервис")
+    Component(Tenant_db, "База данных арендаторов", "Хранение аккаунтов арендаторов")
+
+    Rel(Tenant, tenant_web, "Регистрируется или администрирует систему")
+    Rel(tenant_web, TenantGateway, "Маршрутизирует запросы")
+    Rel(TenantGateway, TenantAuthService, "Регистрация и авторизация аккаунтов арендаторов")
+    Rel(TenantAuthService, Tenant_db, "Запрос/сохранение данных аккаунта")
+    Rel(TenantGateway, TenantBillingService, "Информация об оплате")
+    Rel(TenantBillingService, Tenant_db, "Обновление информации об оплате для пользователя")
+    Rel(tenant_web, BillingGateway, "Перенаправление в платежный шлюз")
+    Rel(BillingGateway, tenant_web, "Перенаправление в магазин с результатом оплаты (успешно, ошибка, отмена, превышен таймаут)")
+
+@enduml

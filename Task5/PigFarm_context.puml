@@ -1,0 +1,36 @@
+@startuml
+title Контекстная диаграмма PigFarm
+
+top to bottom direction
+
+!includeurl https://raw.githubusercontent.com/RicardoNiepel/C4-PlantUML/master/C4_Component.puml
+
+Person(livestockSpecialist, "Зоотехник", "Следит за запасами еды и прогнозирует расход")
+Person(livestockBreeder, "Животновод", "осществляет кормление и поение животных")
+Person(Veterinar, "Ветеринар", "Следит за состоянием животных")
+Person(TechnicalSpecialist, "Техник", "Технический специалист, обслуживающий оборудование")
+Person(TenantAdministrator, "Администратор тенанта", "Лицо, заключившее договор аренды системы и администрирующее свою часть")
+System(LocalAnaliticSystem, "Локальная система аналитики", "Система анализирует работу фермы, передает данные на центральный сервер")
+System(VideoCameraSystem, "Система видеокамер", "Система ведет наблюдение за животными")
+System(AIAgent, "ИИ агент", "ИИ агент, анализирующий поведение животных")
+System(WaterAnalizer, "Датчики состояния воды", "Датчики, анализирующие фильтрацию воды")
+System(CentralMonitoringSystem, "Центральная система мониторинга", "Система получает данные с разных ферм, предоставляет данные руководству")
+
+
+System_Ext(MetricMonitoring, "Система сбора метрик", "Система сбора метрик IT инфраструктуры")
+Rel(livestockSpecialist, LocalAnaliticSystem, "Передает данные")
+Rel(LocalAnaliticSystem,livestockBreeder,"Получает указания по кормлению и поению животных")
+Rel(Veterinar,LocalAnaliticSystem,"Передает данные о состоянии животных")
+Rel(VideoCameraSystem, AIAgent, "Передача видеоданных")
+Rel(AIAgent, Veterinar, "Уведомление об инцидентах")
+Rel(WaterAnalizer, LocalAnaliticSystem, "Передача данных о состоянии воды")
+Rel(TechnicalSpecialist, LocalAnaliticSystem, "Запрашивает и получает данные о состоянии фильтрации воды")
+Rel(LocalAnaliticSystem, CentralMonitoringSystem, "Передает данные о состоянии и поголовье скота, ")
+Rel(TechnicalSpecialist, CentralMonitoringSystem, "Размещает заказы на поставку запчастей и оборудования")
+Rel(LocalAnaliticSystem,MetricMonitoring,"Передача метрик")
+Rel(AIAgent,MetricMonitoring,"Передача метрик")
+Rel(CentralMonitoringSystem,MetricMonitoring,"Передача метрик")
+Rel(TenantAdministrator,CentralMonitoringSystem,"Управляет аккаунтами сотрудников")
+Rel(TenantAdministrator,LocalAnaliticSystem,"Управляет аккаунтами сотрудников, создает свой инстанс для каждой фермы")
+
+@enduml
